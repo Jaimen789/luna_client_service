@@ -277,49 +277,52 @@ router.put("/remove_group", (0, _jwtVerify.jwtVerify)(['Admin', 'Manager']), (0,
           _context8.next = 9;
           return _client.ClientModel.findOne({
             id: clientId
-          });
+          }).select("-__v");
         case 9:
           client = _context8.sent;
           if (!client) {
-            _context8.next = 22;
+            _context8.next = 25;
             break;
           }
+          console.log("found client", client);
           project = client.projects.find(function (project) {
             return project.id == projectId;
           });
           if (!project) {
-            _context8.next = 19;
+            _context8.next = 22;
             break;
           }
+          console.log("found project", project);
           project.assignedGroups = (_project$assignedGrou = project.assignedGroups) === null || _project$assignedGrou === void 0 ? void 0 : _project$assignedGrou.filter(function (group) {
             return !groupsToRemove.includes(group.groupName);
           });
-          _context8.next = 16;
+          console.log("found project after and before save", project);
+          _context8.next = 19;
           return client.save();
-        case 16:
-          res.status(200).send(project);
-          _context8.next = 20;
-          break;
         case 19:
-          res.status(404).send("Project not found");
-        case 20:
+          res.status(200).send(project);
           _context8.next = 23;
           break;
         case 22:
-          res.status(404).send("Client not found");
+          res.status(404).send("Project not found");
         case 23:
-          _context8.next = 29;
+          _context8.next = 26;
           break;
         case 25:
-          _context8.prev = 25;
+          res.status(404).send("Client not found");
+        case 26:
+          _context8.next = 32;
+          break;
+        case 28:
+          _context8.prev = 28;
           _context8.t0 = _context8["catch"](6);
           console.log('error: ', _context8.t0);
-          res.status(500).send("Internal server error removing group from clients project");
-        case 29:
+          res.status(500).send("Internal server error removing group from client's project");
+        case 32:
         case "end":
           return _context8.stop();
       }
-    }, _callee8, null, [[6, 25]]);
+    }, _callee8, null, [[6, 28]]);
   }));
   return function (_x15, _x16) {
     return _ref8.apply(this, arguments);

@@ -237,40 +237,35 @@ router.post("/add_group", jwtVerify(['Admin', 'Manager']), expressAsyncHandler(
         console.log('req body: ', req.body);
         const clientId = req.body.clientId;
         const projectId = req.body.projectId;
-        const newGroups = req.body.newGroups;
+        const newGroups: any = req.body.newGroups;
 
-        try {
+        try{
             console.log("received client id: ", clientId);
+            const client = await ClientModel.findOne({ id: clientId });
 
-            // Use the updateOne method with the strict: false option
-            const result = await ClientModel.updateOne(
-                { id: clientId },
-                {
-                    $push: { 'projects.$[element].assignedGroups': { $each: newGroups } }
-                },
-                {
-                    arrayFilters: [{ 'element.id': projectId }],
-                    strict: false
+            if(client) {
+                const project = client.projects.find((project) => {
+                    return project.id == projectId;
+                });
+
+                if(project) {
+                    project.assignedGroups?.push(...newGroups);
+                    await client.save();
+
+                    res.status(201).send(project);
+                } else {
+                    res.status(404).send("Project not found");
                 }
-            );
 
-            if (result.nModified > 0) {
-                const client = await ClientModel.findOne({ id: clientId }).select("-__v");
-                const project = client.projects.find((project) => project.id == projectId);
-                res.status(201).send(project);
             } else {
-                res.status(404).send("Client or Project not found");
+                res.status(404).send("Client not found")
             }
+
         } catch (error) {
-            // Log the error to the console
-            console.error("Error adding group to client's project:", error);
-            res.status(500).send("Internal server error adding group to client's project");
+            res.status(500).send("Internal server error adding group to clients project");
         }
-    }
+    } 
 ));
-
-
-
 
 //ADD PROJECT TO EXISTING CLIENT
 router.post("/add_project",jwtVerify(['Admin', 'Manager']), expressAsyncHandler(
