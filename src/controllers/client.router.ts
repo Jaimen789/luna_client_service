@@ -262,6 +262,7 @@ router.post("/add_group", jwtVerify(['Admin', 'Manager']), expressAsyncHandler(
             }
 
         } catch (error) {
+            console.log("error 123", error);
             res.status(500).send("Internal server error adding group to clients project");
         }
     } 
